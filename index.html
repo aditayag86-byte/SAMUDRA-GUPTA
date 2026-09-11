@@ -40,34 +40,7 @@
   </div>
 </div>
 
-<!-- Auth -->
-<div id="auth-screen" class="screen hidden">
-  <div class="auth-wrap">
-    <div class="logo big">⚡ Pulse</div>
-    <p class="tagline">Share moments. Chat in real time.</p>
-    <div class="card">
-      <div class="tabs">
-        <button class="tab active" data-tab="login">Log in</button>
-        <button class="tab" data-tab="signup">Sign up</button>
-      </div>
-      <form id="login-form" class="auth-form">
-        <input type="email" id="login-email" placeholder="Email" autocomplete="email" required>
-        <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" required>
-        <button class="btn primary" type="submit">Log in</button>
-      </form>
-      <form id="signup-form" class="auth-form hidden">
-        <input type="text" id="su-name" placeholder="Full name" maxlength="40" required>
-        <input type="text" id="su-username" placeholder="Username (letters, numbers, _)"
-               pattern="[A-Za-z0-9_]{3,20}" title="3–20 characters: a-z, 0-9, _" required>
-        <input type="email" id="su-email" placeholder="Email" autocomplete="email" required>
-        <input type="password" id="su-pass" placeholder="Password (6+ characters)" minlength="6"
-               autocomplete="new-password" required>
-        <button class="btn primary" type="submit">Create account</button>
-      </form>
-      <p id="auth-error" class="error"></p>
-    </div>
-  </div>
-</div>
+<!-- Guest mode: no login screen — visitors enter the app directly -->
 
 <!-- Main app -->
 <div id="app" class="hidden">

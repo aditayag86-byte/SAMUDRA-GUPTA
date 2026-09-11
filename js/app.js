@@ -3,8 +3,7 @@
    ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signOut, updateProfile
+  getAuth, onAuthStateChanged, signInAnonymously, signOut, updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc,
@@ -14,7 +13,7 @@ import {
 
 /* ---------- tiny DOM helpers ---------- */
 const $ = (s) => document.querySelector(s);
-const SCREENS = ["setup-screen", "auth-screen", "feed-screen", "chats-screen", "chat-screen", "profile-screen"];
+const SCREENS = ["setup-screen", "feed-screen", "chats-screen", "chat-screen", "profile-screen"];
 const show = (id) => {
   const splash = $("#boot-splash"); if (splash) splash.classList.add("hidden");
   SCREENS.forEach((s) => $("#" + s).classList.toggle("hidden", s !== id));
@@ -106,15 +105,27 @@ try { if (localStorage.getItem(CONFIG_KEY)) savedCfg = JSON.parse(localStorage.g
   db = getFirestore(app);
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) { show("auth-screen"); return; }
+    if (!user) {
+      // No login screens — everyone enters freely as a guest.
+      try {
+        await signInAnonymously(auth);
+      } catch (ex) {
+        const b = $("#boot-error");
+        if (b) b.textContent =
+          "Owner action needed: open Firebase Console → Authentication → Sign-in method → enable 'Anonymous', then reload. (" + (ex.code || ex.message) + ")";
+      }
+      return;
+    }
     me = user;
     const ref = doc(db, "users", user.uid);
     const snap = await getDoc(ref);
     if (snap.exists()) meDoc = { id: user.uid, ...snap.data() };
     else {
+      // Auto guest identity — user can personalize it later in Profile.
+      const g = Math.floor(1000 + Math.random() * 9000);
       const fallback = {
-        name: user.displayName || "New user",
-        username: "user" + user.uid.slice(0, 6).toLowerCase(),
+        name: "Guest " + g,
+        username: "guest" + Math.random().toString(36).slice(2, 8),
         bio: "", createdAt: serverTimestamp()
       };
       await setDoc(ref, fallback);
@@ -125,38 +136,6 @@ try { if (localStorage.getItem(CONFIG_KEY)) savedCfg = JSON.parse(localStorage.g
     enterApp();
   });
 }
-/* ================= Auth forms ================= */
-document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
-  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === t));
-  const signup = t.dataset.tab === "signup";
-  $("#login-form").classList.toggle("hidden", signup);
-  $("#signup-form").classList.toggle("hidden", !signup);
-  $("#auth-error").textContent = "";
-}));
-
-$("#login-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    await signInWithEmailAndPassword(auth, $("#login-email").value.trim(), $("#login-pass").value);
-  } catch (ex) { err("auth-error", ex); }
-});
-
-$("#signup-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = $("#su-name").value.trim();
-  const username = $("#su-username").value.trim().toLowerCase();
-  const email = $("#su-email").value.trim();
-  const pass = $("#su-pass").value;
-  try {
-    const taken = await getDocs(query(collection(db, "users"), where("username", "==", username), limit(1)));
-    if (!taken.empty) throw new Error("That username is already taken.");
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await updateProfile(cred.user, { displayName: name });
-    await setDoc(doc(db, "users", cred.user.uid), {
-      name, username, bio: "", createdAt: serverTimestamp()
-    });
-  } catch (ex) { err("auth-error", ex); }
-});
 
 /* ================= User directory cache ================= */
 async function refreshUsers() {
@@ -209,10 +188,10 @@ function renderProfile() {
     usersCache[me.uid] = meDoc;
     renderProfile();
   });
-  const logout = el("button", "btn", "Log out");
-  logout.style.marginTop = "12px";
-  logout.addEventListener("click", () => { Object.values(unsub).forEach((u) => u()); signOut(auth); });
-  v.append(card, form, logout);
+  const reset = el("button", "btn", "Get a new guest identity");
+  reset.style.marginTop = "12px";
+  reset.addEventListener("click", () => { Object.values(unsub).forEach((u) => u()); signOut(auth); location.reload(); });
+  v.append(card, form, reset);
 }
 /* ================= Feed ================= */
 let postsCount = 0;
