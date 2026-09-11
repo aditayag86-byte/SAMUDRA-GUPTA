@@ -7,44 +7,20 @@ no app store build needed. Installable on phones ("Add to Home screen").
 **Stack:** HTML + CSS + vanilla JS · Firebase (Auth + Firestore) · works on GitHub Pages,
 Netlify, Vercel, Cloudflare Pages — all free.
 
+**Live:** https://aditayag86-byte.github.io/SAMUDRA-GUPTA/
+
 ---
 
-## 1. Get your free Firebase config (2 minutes)
+## Setup already done ✔
 
-1. Go to <https://console.firebase.google.com> → **Add project** (any name, Analytics off is fine).
-2. Click the **Web `</>`** icon → register the app → copy the `firebaseConfig` object.
-3. Enable **Authentication → Sign-in method → Email/Password → Enable**.
-4. Enable **Firestore Database → Create database** (start in test mode for now).
-5. Open the app → paste the config in the setup screen (it's stored in your browser only).
+- The Firebase project config is **baked into `js/app.js`** — visitors sign up directly.
+- Email/Password authentication is enabled.
+- Firestore database is created. `firestore.rules` in this folder holds the security rules.
 
-### Firestore security rules (paste in Firestore → Rules)
+## Firestore security rules
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{uid} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == uid;
-    }
-    match /posts/{id} {
-      allow read, create: if request.auth != null;
-      allow update, delete: if request.auth != null &&
-        request.auth.uid == resource.data.uid;
-      match /comments/{cid} {
-        allow read, create: if request.auth != null;
-      }
-    }
-    match /chats/{chatId} {
-      allow read, write: if request.auth != null &&
-        request.auth.uid in resource.data.members;
-      match /messages/{mid} {
-        allow read, create: if request.auth != null;
-      }
-    }
-  }
-}
-```
+Copy everything from **`firestore.rules`** and paste it in
+Firebase Console → Firestore Database → **Rules** tab → Publish.
 
 ## 2. Publish free (pick one)
 
