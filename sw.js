@@ -1,4 +1,4 @@
-const CACHE = "pulse-v2";
+const CACHE = "pulse-v3";
 const SHELL = ["./", "./index.html", "./css/style.css", "./js/app.js", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e) => {

@@ -3,7 +3,8 @@
    ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, signInAnonymously, signOut, updateProfile
+  getAuth, onAuthStateChanged, signInAnonymously, signOut, updateProfile,
+  GoogleAuthProvider, signInWithPopup, linkWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc,
@@ -134,7 +135,58 @@ try { if (localStorage.getItem(CONFIG_KEY)) savedCfg = JSON.parse(localStorage.g
     usersCache[me.uid] = meDoc;
     await refreshUsers();
     enterApp();
+    renderAccountBanner();
   });
+}
+
+/* ============ Permanent account: connect Google (like Instagram) ============
+   Linking (not new signup) keeps the SAME user id, so every post, like, comment
+   and DM the guest already made becomes permanently attached to their Google
+   account — recoverable on any device by signing in with Google. */
+const isGoogleLinked = () => !!auth?.currentUser?.providerData?.some((p) => p.providerId === "google.com");
+
+async function connectGoogle() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+    if (isGoogleLinked()) return;
+    // Upgrade the current guest account to a permanent Google account.
+    await linkWithPopup(user, provider);
+    // Record the real name once connected.
+    const u = auth.currentUser;
+    await updateProfile(u, { displayName: u.displayName || user.displayName });
+    await setDoc(doc(db, "users", u.uid),
+      { name: u.displayName || meDoc.name, email: u.email || "" }, { merge: true });
+    meDoc = { ...meDoc, name: u.displayName || meDoc.name, email: u.email || "" };
+    usersCache[u.uid] = meDoc;
+    renderAccountBanner();
+    renderProfile();
+    subscribePosts(); // re-render feed with new names
+  } catch (ex) {
+    if (ex.code === "auth/credential-already-in-use") {
+      alert("This Google account is already connected to another Pulse profile. Signing you into it now — your previous data will load.");
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      location.reload();
+    } else if (ex.code === "auth/popup-closed-by-user" || ex.code === "auth/cancelled-popup-request") {
+      /* user closed the popup — ignore */
+    } else {
+      alert("Google sign-in problem: " + (ex.code || ex.message) +
+        "\n\nIf this mentions 'unauthorized-domain': Firebase Console → Authentication → Settings → Authorized domains → add: aditayag86-byte.github.io");
+    }
+  }
+}
+
+function renderAccountBanner() {
+  document.getElementById("account-banner")?.remove();
+  if (isGoogleLinked()) return;
+  const bar = el("div", "card account-banner",
+    `<div>💾 Your posts & chats are saved on this device only.</div>`);
+  const btn = el("button", "btn primary small", "Connect Google — save everything forever");
+  btn.addEventListener("click", connectGoogle);
+  bar.append(btn);
+  $("#feed-screen .topbar").after(bar);
 }
 
 /* ================= User directory cache ================= */
@@ -188,9 +240,11 @@ function renderProfile() {
     usersCache[me.uid] = meDoc;
     renderProfile();
   });
-  const reset = el("button", "btn", "Get a new guest identity");
+  const reset = el("button", "btn", isGoogleLinked() ? "Switch Google account" : "💾 Save my data forever — connect Google");
   reset.style.marginTop = "12px";
-  reset.addEventListener("click", () => { Object.values(unsub).forEach((u) => u()); signOut(auth); location.reload(); });
+  reset.addEventListener("click", isGoogleLinked()
+    ? () => signOut(auth).then(() => location.reload())
+    : connectGoogle);
   v.append(card, form, reset);
 }
 /* ================= Feed ================= */

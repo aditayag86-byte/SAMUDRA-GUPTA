@@ -122,6 +122,10 @@ textarea { resize: none; }
 }
 .avatar.small { width: 36px; height: 36px; font-size: 13px; }
 .avatar.big { width: 84px; height: 84px; font-size: 30px; margin: 6px auto 12px; }
+/* ---------- Account banner ---------- */
+.account-banner { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13px; color: var(--muted); }
+.account-banner .btn { flex: none; }
+
 /* ---------- Composer & posts ---------- */
 .composer { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
 .composer-main { flex: 1; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
