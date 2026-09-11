@@ -62,11 +62,19 @@ $("#save-config-btn").addEventListener("click", () => {
 });
 
 /* ================= Boot ================= */
-let savedCfg = null;
-try { savedCfg = JSON.parse(localStorage.getItem(CONFIG_KEY) || "null"); } catch { /* ignore */ }
-if (!savedCfg) {
-  show("setup-screen");
-} else {
+/* Hard-coded Firebase project — visitors need NO setup. */
+const BUILTIN_CONFIG = {
+  apiKey: "AIzaSyC98MRMokemUoarJXqUVURP6g6p5uEEQrQ",
+  authDomain: "pulse-app-346ad.firebaseapp.com",
+  projectId: "pulse-app-346ad",
+  storageBucket: "pulse-app-346ad.firebasestorage.app",
+  messagingSenderId: "291910692277",
+  appId: "1:291910692277:web:0ede798ac6e414474bbdfc",
+  measurementId: "G-9D0ZG0NWHZ"
+};
+let savedCfg = BUILTIN_CONFIG;
+try { if (localStorage.getItem(CONFIG_KEY)) savedCfg = JSON.parse(localStorage.getItem(CONFIG_KEY)); } catch { /* ignore */ }
+{ // initialize Firebase
   const app = initializeApp(savedCfg);
   auth = getAuth(app);
   db = getFirestore(app);

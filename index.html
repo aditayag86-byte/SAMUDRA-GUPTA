@@ -12,13 +12,13 @@
 </head>
 <body>
 
-<!-- One-time Firebase setup -->
-<div id="setup-screen" class="screen">
+<!-- Fallback setup (app ships with a working config baked in) -->
+<div id="setup-screen" class="screen hidden">
   <div class="card setup-card">
     <div class="logo big">⚡ Pulse</div>
-    <h1>One-time setup</h1>
-    <p>Paste your <b>Firebase web app config</b> below — from Firebase Console →
-       ⚙️ Project settings → <i>Your apps</i> → Web app → Config.</p>
+    <h1>Advanced setup</h1>
+    <p>Normally you never see this screen. Optionally override the built-in Firebase
+       config by pasting a <code>firebaseConfig</code> object here.</p>
     <textarea id="fb-config-input" spellcheck="false" placeholder='{
   "apiKey": "AIza...",
   "authDomain": "yourapp.firebaseapp.com",
