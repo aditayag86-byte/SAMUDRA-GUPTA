@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b0e17">
+<meta name="description" content="Pulse — social feed & real-time chat.">
+<title>Pulse · Social & Chat</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- One-time Firebase setup -->
+<div id="setup-screen" class="screen">
+  <div class="card setup-card">
+    <div class="logo big">⚡ Pulse</div>
+    <h1>One-time setup</h1>
+    <p>Paste your <b>Firebase web app config</b> below — from Firebase Console →
+       ⚙️ Project settings → <i>Your apps</i> → Web app → Config.</p>
+    <textarea id="fb-config-input" spellcheck="false" placeholder='{
+  "apiKey": "AIza...",
+  "authDomain": "yourapp.firebaseapp.com",
+  "projectId": "yourapp",
+  "appId": "1:123:web:abc"
+}'></textarea>
+    <button id="save-config-btn" class="btn primary">Save &amp; Continue</button>
+    <p id="setup-error" class="error"></p>
+    <p class="hint">Don't have it yet? Go to <b>console.firebase.google.com</b> → create a
+       free project → add a <b>Web app</b> → enable <b>Authentication → Email/Password</b>
+       and <b>Firestore Database</b> (start mode is in the README).</p>
+  </div>
+</div>
+
+<!-- Auth -->
+<div id="auth-screen" class="screen hidden">
+  <div class="auth-wrap">
+    <div class="logo big">⚡ Pulse</div>
+    <p class="tagline">Share moments. Chat in real time.</p>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Log in</button>
+        <button class="tab" data-tab="signup">Sign up</button>
+      </div>
+      <form id="login-form" class="auth-form">
+        <input type="email" id="login-email" placeholder="Email" autocomplete="email" required>
+        <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" required>
+        <button class="btn primary" type="submit">Log in</button>
+      </form>
+      <form id="signup-form" class="auth-form hidden">
+        <input type="text" id="su-name" placeholder="Full name" maxlength="40" required>
+        <input type="text" id="su-username" placeholder="Username (letters, numbers, _)"
+               pattern="[A-Za-z0-9_]{3,20}" title="3–20 characters: a-z, 0-9, _" required>
+        <input type="email" id="su-email" placeholder="Email" autocomplete="email" required>
+        <input type="password" id="su-pass" placeholder="Password (6+ characters)" minlength="6"
+               autocomplete="new-password" required>
+        <button class="btn primary" type="submit">Create account</button>
+      </form>
+      <p id="auth-error" class="error"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Main app -->
+<div id="app" class="hidden">
+
+  <!-- Feed -->
+  <section id="feed-screen" class="screen">
+    <header class="topbar"><span class="logo">⚡ Pulse</span></header>
+    <div class="composer card">
+      <div id="composer-avatar" class="avatar"></div>
+      <div class="composer-main">
+        <textarea id="post-input" placeholder="What's happening?" rows="2" maxlength="500"></textarea>
+        <button id="post-btn" class="btn primary small">Post</button>
+      </div>
+    </div>
+    <div id="posts-list"></div>
+  </section>
+
+  <!-- Chats list -->
+  <section id="chats-screen" class="screen hidden">
+    <header class="topbar"><span class="logo">💬 Chats</span></header>
+    <input id="user-search" class="search" placeholder="🔍 Search people by username…">
+    <div id="user-results"></div>
+    <div id="chat-list"></div>
+  </section>
+
+  <!-- Conversation -->
+  <section id="chat-screen" class="screen hidden chat-open">
+    <header class="topbar chat-topbar">
+      <button id="chat-back" class="icon-btn" aria-label="Back">←</button>
+      <div id="chat-peer-avatar" class="avatar small"></div>
+      <div id="chat-peer-name" class="peer-name"></div>
+    </header>
+    <div id="messages"></div>
+    <form id="msg-form">
+      <input id="msg-input" placeholder="Message…" autocomplete="off" maxlength="1000">
+      <button class="btn primary send" type="submit" aria-label="Send">➤</button>
+    </form>
+  </section>
+
+  <!-- Profile -->
+  <section id="profile-screen" class="screen hidden">
+    <header class="topbar"><span class="logo">👤 Profile</span></header>
+    <div id="profile-view"></div>
+  </section>
+
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-screen="feed-screen"><i>🏠</i><span>Feed</span></button>
+    <button class="nav-btn" data-screen="chats-screen"><i>💬</i><span>Chats</span></button>
+    <button class="nav-btn" data-screen="profile-screen"><i>👤</i><span>Profile</span></button>
+  </nav>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
