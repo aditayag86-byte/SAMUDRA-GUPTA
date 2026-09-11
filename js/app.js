@@ -57,7 +57,19 @@ let auth, db, me = null, meDoc = null;
 const usersCache = {};   // uid -> {id,name,username,bio}
 const unsub = {};        // active listeners
 let currentChat = null;  // {chatId, peerUid}
-const err = (id, e) => { $("#" + id).textContent = e?.code ? e.code.replace(/-/g, " ") : (e?.message || String(e)); };
+const FRIENDLY_AUTH_ERRORS = {
+  "auth/invalid-credential": "No account matches that email & password. New here? Tap SIGN UP to create your account first.",
+  "auth/invalid-login-credentials": "No account matches that email & password. New here? Tap SIGN UP to create your account first.",
+  "auth/user-not-found": "No account with this email yet. Tap Sign up to create one.",
+  "auth/wrong-password": "Wrong password for this account.",
+  "auth/email-already-in-use": "This email already has an account — use Log in instead.",
+  "auth/weak-password": "Password must be at least 6 characters.",
+  "auth/invalid-email": "That email address looks incorrect.",
+  "auth/network-request-failed": "Network problem — check your internet connection (or VPN) and try again.",
+  "auth/too-many-requests": "Too many attempts. Wait a minute, then try again.",
+  "auth/operation-not-allowed": "Email sign-in is disabled in the Firebase console — enable Email/Password under Authentication."
+};
+const err = (id, e) => { $("#" + id).textContent = (e?.code && FRIENDLY_AUTH_ERRORS[e.code]) || (e?.code ? e.code.replace(/-/g, " ") : (e?.message || String(e))); };
 
 /* ================= Firebase setup screen ================= */
 const CONFIG_KEY = "pulse_fb_config";
