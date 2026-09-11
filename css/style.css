@@ -35,6 +35,17 @@ body::before {
 }
 .hidden { display: none !important; }
 
+#boot-splash {
+  position: fixed; inset: 0; z-index: 999; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px; background: var(--bg);
+  text-align: center; padding: 20px;
+}
+#boot-splash p { color: var(--muted); }
+#boot-error {
+  color: var(--danger); font-size: 13px; max-width: 420px; overflow-wrap: break-word;
+  font-family: ui-monospace, Consolas, monospace;
+}
+
 /* ---------- Cards / buttons / inputs ---------- */
 .card {
   background: var(--surface); border: 1px solid var(--border);

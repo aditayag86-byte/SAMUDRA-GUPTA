@@ -15,7 +15,21 @@ import {
 /* ---------- tiny DOM helpers ---------- */
 const $ = (s) => document.querySelector(s);
 const SCREENS = ["setup-screen", "auth-screen", "feed-screen", "chats-screen", "chat-screen", "profile-screen"];
-const show = (id) => SCREENS.forEach((s) => $("#" + s).classList.toggle("hidden", s !== id));
+const show = (id) => {
+  const splash = $("#boot-splash"); if (splash) splash.classList.add("hidden");
+  SCREENS.forEach((s) => $("#" + s).classList.toggle("hidden", s !== id));
+};
+// Surface any unexpected JS error on screen instead of a blank page
+window.addEventListener("error", (e) => {
+  const b = $("#boot-error");
+  if (b && !$("#boot-splash").classList.contains("hidden"))
+    b.textContent = "Error: " + (e.message || e.type) + (e.filename ? " @ " + e.filename.split("/").pop() + ":" + e.lineno : "");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const b = $("#boot-error");
+  if (b && !$("#boot-splash").classList.contains("hidden"))
+    b.textContent = "Startup problem: " + (e.reason?.code || e.reason?.message || e.reason);
+});
 const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
 const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const timeAgo = (ts) => {
